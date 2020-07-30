@@ -1,0 +1,149 @@
+class Point:
+    def __init__(self, x, y, color):
+        self.x = x
+        self.y = y
+        self.color = color
+
+
+class Grid:
+    def __init__(self,x,y,x_to_find,y_to_find):
+        self.x = x
+        self.y = y
+        self.x_to_find = x_to_find
+        self.y_to_find = y_to_find
+        self.members = []
+        self.temp_members = []
+        self.green_times_counter = 0
+        self.eight_neighbours_list = []
+        self.color_of_neighbours_list = []
+
+    # Checking if our 'special point' is green or red
+    def is_it_green_in_this_gen(self):
+
+        for point in self.members:
+            if point.x == self.x_to_find and point.y == self.y_to_find:
+                if point.color == "1":
+                    self.green_times_counter += 1
+                    break
+
+    # Changes the new and old generations
+    def generation_change(self):
+        self.members = [member for member in self.temp_members]
+        self.temp_members = []
+
+    # Even though different points have a different number of adjacent I have decided to use this function
+    # to always get coordinates of the 8 adjacent points of the current point.
+    # In case there are only 3 or 5 adjacent points, their coordinates will be valid coordinates and the rest points will be
+    # with invalid coordinates ( x < 0 or y < 0)
+
+    # 22  12  13
+    # 21  x   15
+    # 20  18  16
+    # to better imagine the position of the neighbouring points I have decided to consider the 
+    # grid as a square clock and x being our special point
+
+    def find_the_neighbouring_point(self,some_point):
+        self.eight_neighbours_list = []
+        x_12 = some_point.x
+        y_12 = some_point.y - 1
+
+        x_14 = some_point.x + 1
+        y_14 = some_point.y - 1
+
+        x_15 = some_point.x + 1
+        y_15 = some_point.y
+
+        x_16 = some_point.x + 1
+        y_16 = some_point.y + 1
+
+        x_18 = some_point.x
+        y_18 = some_point.y + 1
+
+        x_20 = some_point.x - 1
+        y_20 = some_point.y + 1
+
+        x_21 = some_point.x - 1
+        y_21 = some_point.y
+
+        x_22 = some_point.x - 1
+        y_22 = some_point.y - 1
+
+        self.eight_neighbours_list.append([x_12, y_12])
+        self.eight_neighbours_list.append([x_14, y_14])
+        self.eight_neighbours_list.append([x_15, y_15])
+        self.eight_neighbours_list.append([x_16, y_16])
+        self.eight_neighbours_list.append([x_18, y_18])
+        self.eight_neighbours_list.append([x_20, y_20])
+        self.eight_neighbours_list.append([x_21, y_21])
+        self.eight_neighbours_list.append([x_22, y_22])
+
+    # We iterate the self.color_of_neighbours_list and we add the "color" value of the points with valid coordinates
+    # Instead of counting the "1" the green cells and "0" the red cells I have decided to add all of the "1" and "0"
+    # in a list and see their sum. if the sum is 2,3 or 6, the adjacent green cells are 2, 3 or 6.
+    def adding_the_color(self):
+        self.color_of_neighbours_list = []
+        for xx,yy in self.eight_neighbours_list:
+                for point_in_grid in my_grid.members:
+                    if point_in_grid.x == xx and point_in_grid.y == yy:
+                        self.color_of_neighbours_list.append(int(point_in_grid.color))
+
+                    else:
+                        pass
+
+    #Once the have the sum of the adjacent "colors" we determine if we should change the color of the
+    # current point or not
+    def red_or_green(self,some_point):
+        temp_x = some_point.x
+        temp_y = some_point.y
+        temp_color = " "
+
+        if some_point.color == "0":
+            if sum(self.color_of_neighbours_list) == 3 or sum(self.color_of_neighbours_list) == 6:
+                temp_color = "1"
+
+            else:
+                temp_color = "0"
+
+        elif some_point.color == "1":
+            if sum(self.color_of_neighbours_list) == 3 or sum(self.color_of_neighbours_list) == 6 or sum(self.color_of_neighbours_list) == 2:
+                temp_color = "1"
+
+            else:
+                temp_color = "0"
+
+        temp_point = Point(temp_x,temp_y,temp_color)
+        self.temp_members.append(temp_point)
+
+
+
+list_of_incoming_strings = []
+
+x, y = list(map(int, input().split(", ")))
+
+for _ in range(y):
+    entry = input()
+    list_of_incoming_strings.append(entry)
+
+x_to_find, y_to_find, number_of_repetitions = list(map(int, input().split(", ")))
+
+my_grid = Grid(x,y,x_to_find,y_to_find)
+
+for row_y in range(len(list_of_incoming_strings)):
+    for column_x in range(len(list_of_incoming_strings[row_y])):
+        my_point = Point(column_x, row_y, list_of_incoming_strings[row_y][column_x])
+        my_grid.members.append(my_point)
+
+for rep in range(number_of_repetitions+1):
+    if rep != 0:
+        my_grid.generation_change()
+    my_grid.is_it_green_in_this_gen()
+
+    for current_point in my_grid.members:
+        if rep == number_of_repetitions + 1:
+            break
+        my_grid.find_the_neighbouring_point(current_point)
+        my_grid.adding_the_color()
+        my_grid.red_or_green(current_point)
+
+print(my_grid.green_times_counter)
+
